@@ -1,5 +1,4 @@
-﻿using CRMDashboardAPI.Models;
-using CRMProject.Models;
+﻿using CRMProject.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using CRMDashboardAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace CRMProject.Models;
@@ -22,12 +21,15 @@ public partial class TaskDbContext : DbContext
 
     public virtual DbSet<Lead> Leads { get; set; }
 
+    public virtual DbSet<MyProfile> MyProfile { get; set; }
+
     public virtual DbSet<TaskDashboard> Tasks { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
 
     }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Customer>(entity =>
@@ -98,9 +100,42 @@ public partial class TaskDbContext : DbContext
             entity.Property(e => e.Type).HasMaxLength(50);
         });
 
-        modelBuilder.Entity<Task>(entity =>
+        modelBuilder.Entity<MyProfile>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__MyProfil__3214EC071409C45D");
+
+            entity.ToTable("MyProfile");
+
+            entity.HasIndex(e => e.Email, "UQ__MyProfil__AB6E61640F4C771D").IsUnique();
+
+            entity.Property(e => e.Address)
+                .HasMaxLength(255)
+                .HasColumnName("address");
+            entity.Property(e => e.City)
+                .HasMaxLength(50)
+                .HasColumnName("city");
+            entity.Property(e => e.Email)
+                .HasMaxLength(100)
+                .HasColumnName("email");
+            entity.Property(e => e.FirstName)
+                .HasMaxLength(50)
+                .HasColumnName("firstName");
+            entity.Property(e => e.LastName)
+                .HasMaxLength(50)
+                .HasColumnName("lastName");
+            entity.Property(e => e.Mobile)
+                .HasMaxLength(20)
+                .HasColumnName("mobile");
+            entity.Property(e => e.ProfileUrl)
+                .HasMaxLength(50)
+                .HasColumnName("profileUrl");
+        });
+
+        modelBuilder.Entity<TaskDashboard>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Tasks__3213E83FBE026388");
+
+            entity.ToTable("TaskDashboard");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.AssignTo)
@@ -113,7 +148,7 @@ public partial class TaskDbContext : DbContext
                 .HasMaxLength(255)
                 .HasColumnName("labels");
             entity.Property(e => e.Note).HasColumnName("note");
-            entity.Property(e => e.Task1)
+            entity.Property(e => e.Task)
                 .HasMaxLength(255)
                 .HasColumnName("task");
             entity.Property(e => e.Type)

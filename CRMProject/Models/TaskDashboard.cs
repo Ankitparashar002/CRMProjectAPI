@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace CRMDashboardAPI.Models;
+namespace CRMProject.Models;
 
 public partial class TaskDashboard
 {
@@ -15,7 +15,7 @@ public partial class TaskDashboard
 
     public string? Labels { get; set; }
 
-    public string Date { get; set; } = null!;
+    public string? Date { get; set; }
 
     public string? Note { get; set; }
 }
