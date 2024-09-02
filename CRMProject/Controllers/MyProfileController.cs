@@ -49,40 +49,26 @@ namespace CRMProject.Controllers
         [HttpPost("{id}")]
         public async Task<ActionResult<MyProfile>> CreateProfile(MyProfile profile,int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
+           
             var find = await context.MyProfile.FindAsync(id);
             if (find == null)
             {
                 return BadRequest("fail");
             }
-            find.FirstName = profile.FirstName;
-            find.LastName = profile.LastName;
-            find.Email = profile.Email;
-            find.Mobile = profile.Mobile;
-            find.Address =profile.Address;
-            find.City = profile.City;
+            if (profile.FirstName != null)
+            {
+                find.FirstName = profile.FirstName;
+                find.LastName = profile.LastName;
+                find.Email = profile.Email;
+                find.Mobile = profile.Mobile;
+                find.Address = profile.Address;
+                find.City = profile.City;
+            }
             find.ProfileUrl = profile.ProfileUrl;   
             //  context.Customers.Update(customer);
             await context.SaveChangesAsync();
             return Ok();
         }
-
-        [HttpPost("{id}/profileUrl")]
-        public async Task<ActionResult<MyProfile>> UpdateProfileUrl(int id, [FromBody] string profileUrl)
-        {
-            var find = await context.MyProfile.FindAsync(id);
-            if (find == null)
-            {
-                return BadRequest("Fail");
-            }
-            find.ProfileUrl = profileUrl;
-            await context.SaveChangesAsync();
-            return Ok();
-        }
-
 
     }
 }
