@@ -29,13 +29,13 @@ public partial class TaskDbContext : DbContext
     {
 
     }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Customer>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Customer__3214EC07496A5F34");
 
+            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Address).HasMaxLength(255);
             entity.Property(e => e.Email).HasMaxLength(255);
             entity.Property(e => e.Mobile).HasMaxLength(15);
@@ -59,6 +59,7 @@ public partial class TaskDbContext : DbContext
             entity.Property(e => e.Bed)
                 .HasMaxLength(10)
                 .HasColumnName("bed");
+            entity.Property(e => e.CustomerId).HasColumnName("customerId");
             entity.Property(e => e.Floor)
                 .HasMaxLength(10)
                 .HasColumnName("floor");
@@ -84,6 +85,11 @@ public partial class TaskDbContext : DbContext
                 .HasColumnName("rent");
             entity.Property(e => e.StaffRoom).HasColumnName("staffRoom");
             entity.Property(e => e.StiltParking).HasColumnName("stiltParking");
+
+            entity.HasOne(d => d.Customer).WithMany(p => p.Inventories)
+                .HasForeignKey(d => d.CustomerId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_inventory_Customers");
         });
 
         modelBuilder.Entity<Lead>(entity =>

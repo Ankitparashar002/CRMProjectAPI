@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using CRMProject.Models;
 
-namespace CRMProject.Models;
+namespace CRMProject.DTO;
 
-public partial class Customer
+public partial class CustomerDto
 {
-    public int Id { get; set; }
-
+ 
     public string Name { get; set; } = null!;
 
     public string? Mobile { get; set; }
@@ -23,7 +21,8 @@ public partial class Customer
 
     public string? Status { get; set; }
 
-    public bool InventoryStatus { get; set; }
+    public int InventoryId { get; set; }
 
-    public virtual ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
+   
 }
+

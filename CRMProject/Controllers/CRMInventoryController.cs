@@ -1,7 +1,10 @@
-﻿using CRMProject.Models;
+﻿using AutoMapper;
+using CRMProject.DTO;
+using CRMProject.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CRMProject.Controllers
 {
@@ -10,19 +13,31 @@ namespace CRMProject.Controllers
     public class CRMInventoryController : ControllerBase
     {
         private readonly TaskDbContext context;
+        private readonly IMapper mapper;
 
-        public CRMInventoryController(TaskDbContext context)
+        public CRMInventoryController(TaskDbContext context, IMapper _mapper)
         {
             this.context = context;
+            this.mapper = _mapper;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Inventory>>> GetTask()
+        public async Task<ActionResult<List<InventoryDto>>> GetTask()
         {
-            var data = await context.Inventories.ToListAsync();
-            return Ok(data);
-        }
+            // Get all inventories and customers from the database
+            var inventories = await context.Inventories.ToListAsync();
+            var customers = await context.Customers.ToListAsync();
 
+            // Filter inventories where the Inventory.CustomerId matches a Customer's Id and Customer's status is true
+            var filteredInventories = inventories
+                .Where(i => customers.Any(c => c.Id == i.CustomerId && c.InventoryStatus == true))
+                .ToList();
+
+            // Map filtered inventories to InventoryDto
+            var inventoryDtos = mapper.Map<List<InventoryDto>>(filteredInventories);
+
+            return Ok(inventoryDtos);
+        }
 
         [HttpPost]
         public async Task<ActionResult<Inventory>> CreateTask(Inventory std)
@@ -67,7 +82,7 @@ namespace CRMProject.Controllers
             find.Remarks=inventory.Remarks;
 
             await context.SaveChangesAsync();
-            return Ok();
+            return NoContent();
         }
 
         [HttpDelete("{id}")]

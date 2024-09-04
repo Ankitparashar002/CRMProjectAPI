@@ -14,6 +14,7 @@ namespace CRMProject.Controllers
         public CRMDashboardController(TaskDbContext context)
         {
             this.context = context;
+            
         }
 
         [HttpGet]

@@ -1,4 +1,6 @@
-﻿using Azure;
+﻿using AutoMapper;
+using Azure;
+using CRMProject.DTO;
 using CRMProject.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
@@ -12,22 +14,26 @@ namespace CRMProject.Controllers
     public class CRMCustomerController : ControllerBase
     {
         private readonly TaskDbContext context;
+        private readonly IMapper mapper;
 
-        public CRMCustomerController(TaskDbContext context)
+        public CRMCustomerController(TaskDbContext context, IMapper _mapper)
         {
             this.context = context;
+            this.mapper = _mapper;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Customer>>> GetCustomer()
+        public async Task<ActionResult<List<CustomerDto>>> GetCustomer()
         {
             var data = await context.Customers.ToListAsync();
-            return Ok(data);
+            var customerDtos = mapper.Map<List<CustomerDto>>(data);
+
+            return Ok(customerDtos);
         }
 
 
         [HttpPost]
-        public async Task<ActionResult<Customer>> CreateTask(Customer std)
+        public async Task<ActionResult<CustomerDto>> CreateTask(Customer std)
         {
             await context.Customers.AddAsync(std);
             await context.SaveChangesAsync();

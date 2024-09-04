@@ -1,3 +1,4 @@
+using CRMProject.Mapper;
 using CRMProject.Models;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Serialization;
@@ -25,8 +26,9 @@ builder.Services.AddCors(options =>
 
 var provider = builder.Services.BuildServiceProvider();
 var config = provider.GetRequiredService<IConfiguration>();
-builder.Services.AddDbContext<TaskDbContext>(item => item.UseSqlServer(config.GetConnectionString("dbcs")));
+builder.Services.AddAutoMapper(typeof(MapperProfile));
 
+builder.Services.AddDbContext<TaskDbContext>(item => item.UseSqlServer(config.GetConnectionString("dbcs")));
 
 
 var app = builder.Build();
@@ -37,6 +39,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 
 // Use the CORS policy
 app.UseCors("AllowAllOrigins");
