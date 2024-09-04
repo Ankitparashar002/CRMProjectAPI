@@ -12,6 +12,7 @@ namespace CRMProject.Controllers
     public class MyProfileController : ControllerBase
     {
         private readonly TaskDbContext context;
+        private readonly string imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
 
         public MyProfileController(TaskDbContext context)
         {
@@ -69,6 +70,30 @@ namespace CRMProject.Controllers
             await context.SaveChangesAsync();
             return Ok();
         }
+
+        [HttpPost("upload-image")]
+        public async Task<IActionResult> UploadImage(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("No file uploaded.");
+            }
+
+            var filePath = Path.Combine(imagePath, file.FileName);
+
+            // Ensure the directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+            // Save the file to the server
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            // You can return the file URL or some other response here
+            return Ok(new { FilePath = filePath });
+        }
+
 
     }
 }

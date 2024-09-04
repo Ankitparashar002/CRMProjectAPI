@@ -55,7 +55,34 @@ namespace CRMProject.Controllers
             {
                 return BadRequest("fail");
             }
-            find.Name = customer.Name;
+            if (customer.Name != null)
+            {
+                find.Name = customer.Name;
+            }
+            if(find.Email != null)
+            {
+                find.Email = customer.Email;
+            }
+            if (find.Mobile != null)
+            {
+                find.Mobile = customer.Mobile;
+            }       
+            if (customer.Property != null)
+            {
+                find.Property = customer.Property;
+            }
+            if (customer.Address != null)
+            {
+                find.Address = customer.Address;
+            }
+            if (customer.Need != null)
+            {
+                find.Need = customer.Need;
+            }
+            if (customer.Remarks != null)
+            {
+                find.Remarks = customer.Remarks;
+            }
             //  context.Customers.Update(customer);
             await context.SaveChangesAsync();
             return Ok();
