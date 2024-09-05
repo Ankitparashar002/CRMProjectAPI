@@ -4,7 +4,8 @@ namespace CRMProject.DTO;
 
 public partial class CustomerDto
 {
- 
+    public int Id { get; set; }
+
     public string Name { get; set; } = null!;
 
     public string? Mobile { get; set; }
@@ -21,8 +22,9 @@ public partial class CustomerDto
 
     public string? Status { get; set; }
 
-    public int InventoryId { get; set; }
+    public bool InventoryStatus { get; set; }
 
-   
+
+
 }
 

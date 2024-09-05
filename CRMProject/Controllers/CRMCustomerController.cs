@@ -33,12 +33,14 @@ namespace CRMProject.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult<CustomerDto>> CreateTask(Customer std)
+        public async Task<ActionResult<CustomerDto>> CreateCustomer(CustomerDto customerDto)
         {
-            await context.Customers.AddAsync(std);
+            var customer = mapper.Map<Customer>(customerDto);
+            await context.Customers.AddAsync(customer);
             await context.SaveChangesAsync();
-           
-            return CreatedAtAction(nameof(GetCustomer), new { id = std.Id }, std);
+
+            var createdCustomerDto = mapper.Map<CustomerDto>(customer);
+            return CreatedAtAction(nameof(GetCustomerById), new { id = customer.Id }, createdCustomerDto);
 
         }
 
@@ -54,8 +56,9 @@ namespace CRMProject.Controllers
         }
 
         [HttpPost("{id}")]
-        public async Task<ActionResult<Customer>> EditCustomer(Customer customer, int id)
+        public async Task<ActionResult<CustomerDto>> EditCustomer(CustomerDto customer, int id)
         {
+        
             var find = await context.Customers.FindAsync(id);
             if (find == null)
             {
@@ -90,10 +93,28 @@ namespace CRMProject.Controllers
                 find.Remarks = customer.Remarks;
             }
             //  context.Customers.Update(customer);
+            var customers = mapper.Map<Customer>(customer);
+             context.Customers.Update(customers);
             await context.SaveChangesAsync();
             return Ok();
         }
 
+        [HttpPut("{id}")]
+        public async Task<ActionResult<CustomerDto>> EditCustomer(int id, CustomerDto customerDto)
+        {
+            var existingCustomer = await context.Customers.FindAsync(id);
+            if (existingCustomer == null)
+            {
+                return NotFound();
+            }
+
+            mapper.Map(customerDto, existingCustomer);
+            context.Customers.Update(existingCustomer);
+            await context.SaveChangesAsync();
+
+            var updatedCustomerDto = mapper.Map<CustomerDto>(existingCustomer);
+            return Ok(updatedCustomerDto);
+        }
 
 
         [HttpDelete("{id}")]

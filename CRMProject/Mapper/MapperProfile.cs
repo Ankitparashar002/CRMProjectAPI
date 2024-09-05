@@ -9,6 +9,7 @@ public class MapperProfile : Profile
     public MapperProfile()
     {
         CreateMap<Customer, CustomerDto>();
+        CreateMap<CustomerDto, Customer>();
         CreateMap<Inventory, InventoryDto>();
     }
 
