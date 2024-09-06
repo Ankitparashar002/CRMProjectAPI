@@ -5,8 +5,8 @@ namespace CRMProject.DTO;
 
     public partial class InventoryDto
     {
-   
 
+    public int Id { get; set; }
     public string? PropertyType { get; set; }
 
     public string? PropertyStatus { get; set; }

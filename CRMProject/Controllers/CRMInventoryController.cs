@@ -40,23 +40,80 @@ namespace CRMProject.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Inventory>> CreateTask(Inventory std)
+        public async Task<ActionResult<InventoryDto>> CreateTask(InventoryDto inventoryDto)
         {
-            await context.Inventories.AddAsync(std);
-            await context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetTaskById), new { id = std.Id }, std);
+            try
+            {
+                var inventory = mapper.Map<Inventory>(inventoryDto);
+                await context.Inventories.AddAsync(inventory);
+                await context.SaveChangesAsync();
+                var createdInventoryDto = mapper.Map<InventoryDto>(inventory);
 
+                return CreatedAtAction(nameof(GetInventoryById), new { id = inventory.Id }, createdInventoryDto);
+            }
+            catch (ArgumentNullException ex)
+            {
+                // Handle specific exception
+                return BadRequest(new { message = "Invalid input data", details = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Handle specific exception
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Database operation failed", details = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                // Handle general exceptions
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An unexpected error occurred", details = ex.Message });
+            }
         }
 
+
         [HttpGet("{id}")]
-        public async Task<ActionResult<Inventory>> GetTaskById(int id)
+        public async Task<ActionResult<InventoryDto>> GetInventoryById(int id)
         {
-            var Task = await context.Inventories.FindAsync(id);
-            if (Task == null)
+            var inventory = await context.Inventories.FindAsync(id);
+            if (inventory == null)
             {
                 return NotFound();
             }
-            return Task;
+
+            var inventoryDto = mapper.Map<InventoryDto>(inventory);
+            return Ok(inventoryDto);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateInventory(int id, InventoryDto inventoryDto)
+        {
+            if (id != inventoryDto.Id)
+            {
+                return BadRequest("Inventory ID mismatch");
+            }
+
+            var existingInventory = await context.Inventories.FindAsync(id);
+            if (existingInventory == null)
+            {
+                return NotFound();
+            }
+
+            // Map updated properties
+            mapper.Map(inventoryDto, existingInventory);
+
+            try
+            {
+                await context.SaveChangesAsync();
+                return NoContent();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                // Handle concurrency issues
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Database update failed", details = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                // Handle other exceptions
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An unexpected error occurred", details = ex.Message });
+            }
         }
 
         [HttpPost("{id}")]

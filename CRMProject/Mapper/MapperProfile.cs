@@ -10,7 +10,7 @@ public class MapperProfile : Profile
     {
         CreateMap<Customer, CustomerDto>();
         CreateMap<CustomerDto, Customer>();
-        CreateMap<Inventory, InventoryDto>();
+        CreateMap<Inventory, InventoryDto>().ReverseMap();
     }
 
 }

@@ -26,7 +26,8 @@ public partial class TaskDbContext : DbContext
     public virtual DbSet<TaskDashboard> Tasks { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    { 
+    {
+
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -37,7 +38,6 @@ public partial class TaskDbContext : DbContext
 
             entity.Property(e => e.Address).HasMaxLength(255);
             entity.Property(e => e.Email).HasMaxLength(255);
-            entity.Property(e => e.Mobile).HasMaxLength(15);
             entity.Property(e => e.Name).HasMaxLength(255);
             entity.Property(e => e.Property).HasMaxLength(50);
             entity.Property(e => e.Status)
