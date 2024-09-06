@@ -36,6 +36,10 @@ public partial class TaskDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Customer__3214EC07496A5F34");
 
+            entity.HasIndex(e => e.Email, "unique_email").IsUnique();
+
+            entity.HasIndex(e => e.Mobile, "unique_mobile").IsUnique();
+
             entity.Property(e => e.Address).HasMaxLength(255);
             entity.Property(e => e.Email).HasMaxLength(255);
             entity.Property(e => e.Name).HasMaxLength(255);
