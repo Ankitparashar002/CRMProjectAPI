@@ -1,9 +1,6 @@
 ﻿using AutoMapper;
-using Azure;
 using CRMProject.DTO;
 using CRMProject.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,116 +22,221 @@ namespace CRMProject.Controllers
         [HttpGet]
         public async Task<ActionResult<List<CustomerDto>>> GetCustomer()
         {
-            var data = await context.Customers.ToListAsync();
-            var customerDtos = mapper.Map<List<CustomerDto>>(data);
+            try
+            {
+                var data = await context.Customers.ToListAsync();
+                var customerDtos = mapper.Map<List<CustomerDto>>(data);
 
-            return Ok(customerDtos);
+                return Ok(customerDtos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
-
 
         [HttpPost]
         public async Task<ActionResult<CustomerDto>> CreateCustomer(CustomerDto customerDto)
         {
-            var customer = mapper.Map<Customer>(customerDto);
-            await context.Customers.AddAsync(customer);
-            await context.SaveChangesAsync();
+            try
+            {
+                // Check if Email or Mobile is unique
+                if (await context.Customers.AnyAsync(c => c.Email == customerDto.Email))
+                {
+                    return Conflict("Email already exists.");
+                }
 
-            var createdCustomerDto = mapper.Map<CustomerDto>(customer);
-            return CreatedAtAction(nameof(GetCustomerById), new { id = customer.Id }, createdCustomerDto);
+                if (await context.Customers.AnyAsync(c => c.Mobile == customerDto.Mobile))
+                {
+                    return Conflict("Mobile number already exists.");
+                }
 
+                var customer = mapper.Map<Customer>(customerDto);
+                await context.Customers.AddAsync(customer);
+                await context.SaveChangesAsync();
+
+                var createdCustomerDto = mapper.Map<CustomerDto>(customer);
+                return CreatedAtAction(nameof(GetCustomerById), new { id = customer.Id }, createdCustomerDto);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Customer>> GetCustomerById(int id)
+        public async Task<ActionResult<CustomerDto>> GetCustomerById(int id)
         {
-            var Task = await context.Customers.FindAsync(id);
-            if (Task == null)
+            try
             {
-                return NotFound();
+                var customer = await context.Customers.FindAsync(id);
+                if (customer == null)
+                {
+                    return NotFound("Customer not found.");
+                }
+
+                var customerDto = mapper.Map<CustomerDto>(customer);
+                return Ok(customerDto);
             }
-            return Task;
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
-        [HttpPost("{id}")]
-        public async Task<ActionResult<CustomerDto>> EditCustomer(CustomerDto customer, int id)
+
+        [HttpGet("{id}/need")]
+        public async Task<ActionResult<string>> GetCustomerNeedById(int id)
         {
-        
-            var find = await context.Customers.FindAsync(id);
-            if (find == null)
+            try
             {
-                return BadRequest("fail");
+                var customer = await context.Customers.FindAsync(id);
+                if (customer == null)
+                {
+                    return NotFound("Customer not found.");
+                }
+
+                return Ok(customer.Need);
             }
-            if (customer.Name != null)
+            catch (Exception ex)
             {
-                find.Name = customer.Name;
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
-            if(find.Email != null)
-            {
-                find.Email = customer.Email;
-            }
-            if (find.Mobile != null)
-            {
-                find.Mobile = customer.Mobile;
-            }       
-            if (customer.Property != null)
-            {
-                find.Property = customer.Property;
-            }
-            if (customer.Address != null)
-            {
-                find.Address = customer.Address;
-            }
-            if (customer.Need != null)
-            {
-                find.Need = customer.Need;
-            }
-            if (customer.Remarks != null)
-            {
-                find.Remarks = customer.Remarks;
-            }
-            //  context.Customers.Update(customer);
-            var customers = mapper.Map<Customer>(customer);
-             context.Customers.Update(customers);
-            await context.SaveChangesAsync();
-            return Ok();
         }
+
+
+        [HttpPatch("need/{id}")]
+        public async Task<ActionResult<CustomerDto>> EditCustomerNeed(int id, [FromBody] string need)
+        {
+            try
+            {
+                var existingCustomer = await context.Customers.FindAsync(id);
+                if (existingCustomer == null)
+                {
+                    return NotFound("Customer not found.");
+                }
+
+                existingCustomer.Need = need;
+                context.Customers.Update(existingCustomer);
+                await context.SaveChangesAsync();
+
+                var updatedCustomerDto = mapper.Map<CustomerDto>(existingCustomer);
+                return Ok(updatedCustomerDto);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
+        [HttpGet("Remarks/{id}")]
+        public async Task<ActionResult<string>> GetCustomerRemarksById(int id)
+        {
+            try
+            {
+                var customer = await context.Customers.FindAsync(id);
+                if (customer == null)
+                {
+                    return NotFound("Customer not found.");
+                }
+
+                return Ok(customer.Need);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
+        [HttpPatch("Remarks/{id}")]
+        public async Task<ActionResult<CustomerDto>> EditCustomerRemarks(int id, [FromBody] string Remarks)
+        {
+            try
+            {
+                var existingCustomer = await context.Customers.FindAsync(id);
+                if (existingCustomer == null)
+                {
+                    return NotFound("Customer not found.");
+                }
+
+                existingCustomer.Remarks = Remarks;
+                context.Customers.Update(existingCustomer);
+                await context.SaveChangesAsync();
+
+                var updatedCustomerDto = mapper.Map<CustomerDto>(existingCustomer);
+                return Ok(updatedCustomerDto);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
 
         [HttpPut("{id}")]
         public async Task<ActionResult<CustomerDto>> EditCustomer(int id, CustomerDto customerDto)
         {
-            var existingCustomer = await context.Customers.FindAsync(id);
-            if (existingCustomer == null)
+            try
             {
-                return NotFound();
+                var existingCustomer = await context.Customers.FindAsync(id);
+                if (existingCustomer == null)
+                {
+                    return NotFound("Customer not found.");
+                }
+                if (await context.Customers.AnyAsync(c => c.Email == customerDto.Email && c.Id != id))
+                {
+                    return Conflict("Email already exists.");
+                }
+
+                if (await context.Customers.AnyAsync(c => c.Mobile == customerDto.Mobile && c.Id != id))
+                {
+                    return Conflict("Mobile number already exists.");
+                }
+
+                mapper.Map(customerDto, existingCustomer);
+                context.Customers.Update(existingCustomer);
+                await context.SaveChangesAsync();
+
+                var updatedCustomerDto = mapper.Map<CustomerDto>(existingCustomer);
+                return Ok(updatedCustomerDto);
             }
-
-            mapper.Map(customerDto, existingCustomer);
-            context.Customers.Update(existingCustomer);
-            await context.SaveChangesAsync();
-
-            var updatedCustomerDto = mapper.Map<CustomerDto>(existingCustomer);
-            return Ok(updatedCustomerDto);
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
+
+
 
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Customer>> DeleteTask(int id)
+        public async Task<ActionResult<CustomerDto>> DeleteCustomer(int id)
         {
-            var std = await context.Customers.FindAsync(id);
-            if (std == null)
+            try
             {
-                return NotFound();
-            }
-            context.Customers.Remove(std);
-            await context.SaveChangesAsync();
-            return Ok(std);
-        }
+                var customer = await context.Customers.FindAsync(id);
+                if (customer == null)
+                {
+                    return NotFound("Customer not found.");
+                }
 
-      
+                context.Customers.Remove(customer);
+                await context.SaveChangesAsync();
+
+                var customerDto = mapper.Map<CustomerDto>(customer);
+                return Ok(customerDto);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
 
         private bool CustomerExists(int id)
         {
             return context.Customers.Any(e => e.Id == id);
         }
-      }
+    }
 }

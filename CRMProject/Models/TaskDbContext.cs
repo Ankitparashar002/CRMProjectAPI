@@ -17,6 +17,8 @@ public partial class TaskDbContext : DbContext
 
     public virtual DbSet<Customer> Customers { get; set; }
 
+    public virtual DbSet<CustomerInventoryListing> CustomerInventoryListings { get; set; }
+
     public virtual DbSet<Inventory> Inventories { get; set; }
 
     public virtual DbSet<Lead> Leads { get; set; }
@@ -47,6 +49,16 @@ public partial class TaskDbContext : DbContext
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
                 .HasDefaultValue("hot");
+        });
+
+        modelBuilder.Entity<CustomerInventoryListing>(entity =>
+        {
+            entity.HasKey(e => e.Ciid);
+
+            entity.ToTable("CustomerInventoryListing");
+
+            entity.Property(e => e.Ciid).HasColumnName("CIid");
+            entity.Property(e => e.CustomerId).HasColumnName("CustomerID");
         });
 
         modelBuilder.Entity<Inventory>(entity =>
