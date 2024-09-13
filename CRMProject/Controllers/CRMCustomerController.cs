@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CRMProject.DTO;
 using CRMProject.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +9,7 @@ namespace CRMProject.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CRMCustomerController : ControllerBase
     {
         private readonly TaskDbContext context;
@@ -178,6 +180,7 @@ namespace CRMProject.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<CustomerDto>> EditCustomer(int id, CustomerDto customerDto)
         {
+           
             try
             {
                 var existingCustomer = await context.Customers.FindAsync(id);

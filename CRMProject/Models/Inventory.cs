@@ -32,8 +32,4 @@ public partial class Inventory
     public bool? StaffRoom { get; set; }
 
     public string? Remarks { get; set; }
-
-    public int CustomerId { get; set; }
-
-    public virtual Customer Customer { get; set; } = null!;
 }

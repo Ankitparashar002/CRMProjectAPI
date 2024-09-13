@@ -20,4 +20,12 @@ public partial class MyProfile
     public string? City { get; set; }
 
     public string? ProfileUrl { get; set; }
+
+    public string Password { get; set; } = null!;
+
+    public string RefreshToken { get; set; } = null!;
+
+    public DateTime TokenCreated { get; set; }
+
+    public DateTime TokenExpires { get; set; }
 }

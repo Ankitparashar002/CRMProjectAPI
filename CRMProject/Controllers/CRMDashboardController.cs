@@ -1,4 +1,5 @@
 ﻿using CRMProject.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ namespace CRMProject.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CRMDashboardController : ControllerBase
     {
         private readonly TaskDbContext context;
@@ -17,17 +19,18 @@ namespace CRMProject.Controllers
             
         }
 
+       
         [HttpGet]
         public async Task<ActionResult<List<TaskDashboard>>> GetTask()
         {
-            var data = await context.Tasks.ToListAsync();
+            var data = await context.TaskDashboards.ToListAsync();
             return Ok(data);
         }
 
         [HttpPost]
         public async Task<ActionResult<TaskDashboard>> CreateTask(TaskDashboard std)
         {
-            await context.Tasks.AddAsync(std);
+            await context.TaskDashboards.AddAsync(std);
             await context.SaveChangesAsync();
             return Ok(std);
 
@@ -36,7 +39,7 @@ namespace CRMProject.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<TaskDashboard>> GetTaskById(int id)
         {
-            var Task = await context.Tasks.FindAsync(id);
+            var Task = await context.TaskDashboards.FindAsync(id);
             if (Task == null)
             {
                 return NotFound();
@@ -47,7 +50,7 @@ namespace CRMProject.Controllers
         [HttpPost("{id}")]
         public async Task<ActionResult<TaskDashboard>> UpdateTask(TaskDashboard taskDashboard,int id)
         {
-            var find = await context.Tasks.FindAsync(id);
+            var find = await context.TaskDashboards.FindAsync(id);
             if (find == null)
             {
                 return BadRequest("Fail to show");
@@ -66,12 +69,12 @@ namespace CRMProject.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<TaskDashboard>> DeleteTask(int id)
         {
-            var std = await context.Tasks.FindAsync(id);
+            var std = await context.TaskDashboards.FindAsync(id);
             if (std == null)
             {
                 return NotFound();
             }
-            context.Tasks.Remove(std);
+            context.TaskDashboards.Remove(std);
             await context.SaveChangesAsync();
             return Ok(std);
         }

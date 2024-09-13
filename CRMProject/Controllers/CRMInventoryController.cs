@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CRMProject.DTO;
 using CRMProject.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ namespace CRMProject.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CRMInventoryController : ControllerBase
     {
         private readonly TaskDbContext context;
@@ -30,7 +32,7 @@ namespace CRMProject.Controllers
 
             // Filter inventories where the Inventory.CustomerId matches a Customer's Id and Customer's status is true
             var filteredInventories = inventories
-                .Where(i => customers.Any(c => c.Id == i.CustomerId && c.InventoryStatus == true))
+                .Where(i => customers.Any(c => c.InventoryStatus == true))
                 .ToList();
 
             // Map filtered inventories to InventoryDto

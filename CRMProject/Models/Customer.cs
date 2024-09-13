@@ -24,6 +24,4 @@ public partial class Customer
     public string? Status { get; set; }
 
     public bool InventoryStatus { get; set; }
-
-    public virtual ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
 }
