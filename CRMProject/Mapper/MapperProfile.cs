@@ -12,6 +12,9 @@ public class MapperProfile : Profile
         CreateMap<Inventory, InventoryDto>().ReverseMap();
         CreateMap<AddCustomerToInventoryRequestDto, CustomerInventoryListing>().ReverseMap();
         CreateMap<AddInventoryToCustomerRequestDto, CustomerInventoryListing>().ReverseMap();
+        CreateMap<Lead, LeadDto>().ReverseMap();
+        CreateMap<MyProfile, MyProfileDto>().ReverseMap();
+        CreateMap<MyProfile,UrlDto>().ReverseMap();
     }
 
 }

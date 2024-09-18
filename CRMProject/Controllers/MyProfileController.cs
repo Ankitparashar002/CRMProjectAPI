@@ -11,6 +11,7 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
+using AutoMapper;
 
 namespace CRMProject.Controllers
 {
@@ -22,27 +23,31 @@ namespace CRMProject.Controllers
         private readonly TaskDbContext context;
         private readonly IConfiguration configuration;
         private readonly string imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+        private readonly IMapper mapper;
 
-        public MyProfileController(TaskDbContext context, IConfiguration configuration)
+        public MyProfileController(TaskDbContext context, IConfiguration configuration, IMapper _mapper)
         {
             this.context = context;
             this.configuration = configuration;
+            this.mapper = _mapper; 
             
         }
 
 
         [Authorize]
         [HttpGet]
-        public async Task<ActionResult<MyProfile>> GetProfile()
+        public async Task<ActionResult<MyProfileDto>> GetProfile()
         {
             var data = await context.MyProfile.ToListAsync();
+            var customerDtos = mapper.Map<List<MyProfileDto>>(data);
             return Ok(data);
         }
 
         [HttpPost]
         public async Task<ActionResult<MyProfile>> CreateProfile(MyProfile profile)
         {
-            // Hash the password if it's provided
+           
+
             if (!string.IsNullOrEmpty(profile.Password))
             {
                 int salt = 12;
@@ -71,7 +76,7 @@ namespace CRMProject.Controllers
         }
 
         [HttpPost("{id}")]
-        public async Task<ActionResult<MyProfile>> UpdateProfile(MyProfile profile,int id)
+        public async Task<ActionResult<MyProfileDto>> UpdateProfile(MyProfileDto profile,int id)
         {
            
             var find = await context.MyProfile.FindAsync(id);
@@ -88,17 +93,31 @@ namespace CRMProject.Controllers
                 find.Address = profile.Address;
                 find.City = profile.City;
             }
-            if (!string.IsNullOrEmpty(profile.Password))
-            {
-                // Hash the new password
-                find.Password = BCrypt.Net.BCrypt.HashPassword(profile.Password);
-            }
 
             find.ProfileUrl = profile.ProfileUrl;   
-            //  context.Customers.Update(customer);
             await context.SaveChangesAsync();
             return Ok();
         }
+
+        [HttpPost("update-url/{id}")]
+        public async Task<ActionResult> UpdateProfileUrl(int id, UrlDto urlDto)
+        {
+            var find = await context.MyProfile.FindAsync(id);
+            if (find == null)
+            {
+                return BadRequest("Profile not found");
+            }
+
+            if (!string.IsNullOrWhiteSpace(urlDto.ProfileUrl))
+            {
+                find.ProfileUrl = urlDto.ProfileUrl;
+                await context.SaveChangesAsync();
+                return Ok("Profile URL updated successfully");
+            }
+
+            return BadRequest("Invalid URL");
+        }
+
 
         [HttpPost("upload-image")]
         public async Task<IActionResult> UploadImage(IFormFile file)
@@ -195,7 +214,7 @@ namespace CRMProject.Controllers
 
         [AllowAnonymous]
         [HttpPost("logout")]
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
             var userEmail = User.FindFirst(ClaimTypes.Name)?.Value;
 
@@ -204,22 +223,39 @@ namespace CRMProject.Controllers
                 Console.WriteLine("User email is null or empty.");
                 return BadRequest("User is not authenticated.");
             }
-            var user = context.MyProfile.SingleOrDefault(u => u.Email == userEmail);
+
+            var user = await context.MyProfile.SingleOrDefaultAsync(u => u.Email == userEmail);
+
             if (user == null)
             {
                 return BadRequest("User not found.");
             }
 
             // Clear the refresh token from the user record
-            user.RefreshToken = "";
-            user.TokenCreated = new DateTime(1753, 1, 1); 
-            user.TokenExpires = new DateTime(1753, 1, 1); 
-            context.SaveChanges();
+            user.RefreshToken = string.Empty;
+            user.TokenCreated = new DateTime(1753,1,1); 
+            user.TokenExpires = new DateTime(1753, 1, 1);
 
-            Response.Cookies.Delete("refreshToken");
+            // Save the changes in the database
+            await context.SaveChangesAsync();
+
+            // Delete the refresh token cookie
+            if (Request.Cookies.ContainsKey("refreshToken"))
+            {
+                Response.Cookies.Delete("refreshToken");
+            }
+
+            // Optionally, forcefully expire all cookies (if you have more)
+            foreach (var cookie in Request.Cookies.Keys)
+            {
+                Response.Cookies.Delete(cookie);
+            }
+
+            // The frontend should be responsible for removing the access token (JWT) from localStorage/sessionStorage.
 
             return Ok("Logout successful.");
         }
+
 
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)

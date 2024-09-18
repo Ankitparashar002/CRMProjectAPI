@@ -32,4 +32,6 @@ public partial class Inventory
     public bool? StaffRoom { get; set; }
 
     public string? Remarks { get; set; }
+
+    public virtual ICollection<Lead> Leads { get; set; } = new List<Lead>();
 }

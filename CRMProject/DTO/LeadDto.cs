@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using CRMProject.Models;
 
-namespace CRMProject.Models;
+namespace CRMProject.DTO;
 
-public partial class Lead
-{
+    public class LeadDto
+    {
     public int Id { get; set; }
 
     public string Type { get; set; } = null!;
@@ -33,5 +32,5 @@ public partial class Lead
 
     public int InventoryId { get; set; }
 
-    public virtual Inventory Inventory { get; set; } = null!;
 }
+

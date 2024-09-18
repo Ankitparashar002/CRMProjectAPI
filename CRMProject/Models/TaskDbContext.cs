@@ -105,16 +105,38 @@ public partial class TaskDbContext : DbContext
 
         modelBuilder.Entity<Lead>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Leads__3214EC0755FF6767");
+            entity.Property(e => e.Area).HasColumnName("area");
+            entity.Property(e => e.AskingPrice).HasColumnName("askingPrice");
+            entity.Property(e => e.Date)
+                 .HasMaxLength(50)
+                 .HasColumnName("date");
+            entity.Property(e => e.Email)
+                .HasMaxLength(255)
+                .HasColumnName("email");
+            entity.Property(e => e.InventoryId).HasColumnName("inventoryId");
+            entity.Property(e => e.Location)
+                .HasMaxLength(255)
+                .HasColumnName("location");
+            entity.Property(e => e.Mobile).HasColumnName("mobile");
+            entity.Property(e => e.Name)
+                .HasMaxLength(255)
+                .HasColumnName("name");
+            entity.Property(e => e.Property).HasColumnName("property");
+            entity.Property(e => e.Remarks).HasColumnName("remarks");
+            entity.Property(e => e.Stage)
+                .HasMaxLength(50)
+                .HasColumnName("stage");
+            entity.Property(e => e.TitleCheck)
+                .HasMaxLength(50)
+                .HasColumnName("titleCheck");
+            entity.Property(e => e.Type)
+                .HasMaxLength(50)
+                .HasColumnName("type");
 
-            entity.Property(e => e.Area).HasMaxLength(50);
-            entity.Property(e => e.AskingPrice).HasMaxLength(50);
-            entity.Property(e => e.Date).HasColumnType("datetime");
-            entity.Property(e => e.Location).HasMaxLength(255);
-            entity.Property(e => e.Name).HasMaxLength(255);
-            entity.Property(e => e.Stage).HasMaxLength(50);
-            entity.Property(e => e.TitleCheck).HasMaxLength(50);
-            entity.Property(e => e.Type).HasMaxLength(50);
+            entity.HasOne(d => d.Inventory).WithMany(p => p.Leads)
+                .HasForeignKey(d => d.InventoryId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Leads_inventory");
         });
 
         modelBuilder.Entity<MyProfile>(entity =>

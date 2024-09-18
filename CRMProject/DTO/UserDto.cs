@@ -1,4 +1,6 @@
-﻿namespace CRMProject.DTO;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace CRMProject.DTO;
 
 public class UserDto
 {

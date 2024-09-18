@@ -42,7 +42,7 @@ namespace CRMProject.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<InventoryDto>> CreateTask(InventoryDto inventoryDto)
+        public async Task<ActionResult<InventoryDto>> CreateInventory(InventoryDto inventoryDto)
         {
             try
             {
@@ -119,7 +119,7 @@ namespace CRMProject.Controllers
         }
 
         [HttpPost("{id}")]
-        public async Task<ActionResult<Inventory>> UpdateTask(Inventory inventory, int id)
+        public async Task<ActionResult<Inventory>> UpdateInventory(Inventory inventory, int id)
         {
             var find = await context.Inventories.FindAsync(id);
             if (find == null)
@@ -145,7 +145,7 @@ namespace CRMProject.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Inventory>> DeleteTask(int id)
+        public async Task<ActionResult<Inventory>> DeleteInventory(int id)
         {
             var std = await context.Inventories.FindAsync(id);
             if (std == null)

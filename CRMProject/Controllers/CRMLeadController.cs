@@ -1,4 +1,7 @@
-﻿using CRMProject.Models;
+﻿using AutoMapper;
+using CRMProject.DTO;
+using CRMProject.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,67 +10,90 @@ namespace CRMProject.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CRMLeadController : ControllerBase
     {
         private readonly TaskDbContext context;
+        private readonly IMapper mapper;
 
-        public CRMLeadController(TaskDbContext context)
+        public CRMLeadController(TaskDbContext context, IMapper mapper)
         {
             this.context = context;
+            this.mapper = mapper;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Lead>>> GetTask()
+        public async Task<ActionResult<List<LeadDto>>> GetLeads()
         {
-            var data = await context.Leads.ToListAsync();
-            return Ok(data);
+            var leads = await context.Leads.ToListAsync();
+            var leadDtos = mapper.Map<List<LeadDto>>(leads);
+            return Ok(leadDtos);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Lead>> GetTaskById(int id)
+        public async Task<ActionResult<LeadDto>> GetLeadsById(int id)
         {
-            var Task = await context.Leads.FindAsync(id);
-            if (Task == null)
+            var lead = await context.Leads.FindAsync(id);
+            if (lead == null)
             {
                 return NotFound();
             }
-            return Task;
+            var leadDto = mapper.Map<LeadDto>(lead);
+            return Ok(leadDto);
         }
 
 
 
-        [HttpPost]
-        public async Task<ActionResult<Lead>> CreateTask(Lead std)
+        [HttpPost("CreateLeads")]
+        public async Task<ActionResult<LeadDto>> CreateLeads(LeadDto leadDto )
         {
-            await context.Leads.AddAsync(std);
+            var lead = mapper.Map<Lead>(leadDto); 
+            await context.Leads.AddAsync(lead);
             await context.SaveChangesAsync();
-            return Ok(std);
+            var createdLeadDto = mapper.Map<LeadDto>(lead);
+            return Ok(createdLeadDto);
 
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Lead>> UpdateTask(int id, Lead std)
+        public async Task<ActionResult<LeadDto>> UpdateLeads(int id, LeadDto leadDto)
         {
-            if (id != std.Id)
+            if (id != leadDto.Id)
             {
                 return BadRequest();
             }
-            context.Entry(std).State = EntityState.Modified;
-            await context.SaveChangesAsync();
-            return Ok(std);
-        }
 
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<Lead>> DeleteTask(int id)
-        {
-            var std = await context.Leads.FindAsync(id);
-            if (std == null)
+            var lead = await context.Leads.FindAsync(id);
+            if (lead == null)
             {
                 return NotFound();
             }
-            context.Leads.Remove(std);
+
+            
+            mapper.Map(leadDto, lead);
+
+            context.Entry(lead).State = EntityState.Modified;
             await context.SaveChangesAsync();
-            return Ok(std);
+
+            var updatedLeadDto = mapper.Map<LeadDto>(lead); 
+            return Ok(updatedLeadDto);
         }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<LeadDto>> DeleteLeads(int id)
+        {
+            var lead = await context.Leads.FindAsync(id);
+            if (lead == null)
+            {
+                return NotFound();
+            }
+
+            context.Leads.Remove(lead);
+            await context.SaveChangesAsync();
+
+            var deletedLeadDto = mapper.Map<LeadDto>(lead); 
+            return Ok(deletedLeadDto);
+        }
+
     }
 }
