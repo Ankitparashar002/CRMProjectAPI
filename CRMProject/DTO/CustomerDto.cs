@@ -32,7 +32,7 @@ public partial class CustomerDto
 
     public bool InventoryStatus { get; set; }
 
-
+    public List<string> Refrences { get; set; } = new List<string>();
 
 }
 

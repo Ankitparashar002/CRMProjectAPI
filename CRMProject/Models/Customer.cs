@@ -24,4 +24,6 @@ public partial class Customer
     public string? Status { get; set; }
 
     public bool InventoryStatus { get; set; }
+
+    public string? Refrence { get; set; }
 }

@@ -4,6 +4,7 @@ using CRMProject.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace CRMProject.Controllers
 {
@@ -85,6 +86,105 @@ namespace CRMProject.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        [HttpGet("{id}/references")]
+        public async Task<ActionResult<List<string>>> GetReferencesFromCustomer(int id)
+        {
+            try
+            {
+                var customer = await context.Customers.FindAsync(id);
+                if (customer == null)
+                {
+                    return NotFound("Customer not found.");
+                }
+
+                // Convert delimited string to list and normalize case
+                var referenceList = string.IsNullOrEmpty(customer.Refrence)
+                    ? new List<string>()
+                    : customer.Refrence.Split(',').Select(r => r.Trim()).ToList();
+
+                return Ok(referenceList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+      
+        [HttpPost("{id}/reference")]
+        public async Task<ActionResult<CustomerDto>> AddReferenceToCustomer(int id, [FromBody] RefrenceCustomerDto referenceDto)
+        {
+            try
+            {
+                var customer = await context.Customers.FindAsync(id);
+                if (customer == null)
+                {
+                    return NotFound("Customer not found.");
+                }
+
+                // Initialize Refrences if it's null
+                var referenceList = customer.Refrence?.Split(',').ToList() ?? new List<string>();
+
+                // Add the new reference
+                if (!referenceList.Contains(referenceDto.Refrence))
+                {
+                    referenceList.Add(referenceDto.Refrence);
+                    customer.Refrence = string.Join(",", referenceList); // Convert list to delimited string
+                }
+
+                context.Customers.Update(customer);
+                await context.SaveChangesAsync();
+
+                var updatedCustomerDto = mapper.Map<CustomerDto>(customer);
+                return Ok(updatedCustomerDto);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
+        [HttpDelete("{id}/reference/{reference}")]
+        public async Task<ActionResult<CustomerDto>> RemoveReferenceFromCustomer(int id, string reference)
+        {
+            try
+            {
+                var customer = await context.Customers.FindAsync(id);
+                if (customer == null)
+                {
+                    return NotFound("Customer not found.");
+                }
+
+                if (!string.IsNullOrEmpty(customer.Refrence))
+                {
+                    // Convert delimited string to list and normalize case
+                    var referenceList = customer.Refrence.Split(',').Select(r => r.Trim().ToLower()).ToList();
+
+                    // Normalize case for the reference to be removed
+                    var referenceToRemove = reference.Trim().ToLower();
+                    if (referenceList.Contains(referenceToRemove))
+                    {
+                        referenceList.Remove(referenceToRemove);
+
+                        // Convert list back to delimited string
+                        customer.Refrence = string.Join(",", referenceList);
+                    }
+                }
+
+                context.Customers.Update(customer);
+                await context.SaveChangesAsync();
+
+                var updatedCustomerDto = mapper.Map<CustomerDto>(customer);
+                return Ok(updatedCustomerDto);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
 
 
         [HttpGet("{id}/need")]

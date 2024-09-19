@@ -19,7 +19,7 @@ public partial class Lead
 
     public string Location { get; set; } = null!;
 
-    public string? Date { get; set; }
+    public string Date { get; set; } = null!;
 
     public long AskingPrice { get; set; }
 

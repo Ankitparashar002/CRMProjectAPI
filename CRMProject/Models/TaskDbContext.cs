@@ -48,6 +48,7 @@ public partial class TaskDbContext : DbContext
             entity.Property(e => e.Email).HasMaxLength(255);
             entity.Property(e => e.Name).HasMaxLength(255);
             entity.Property(e => e.Property).HasMaxLength(50);
+            entity.Property(e => e.Refrence).IsUnicode(false);
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
                 .HasDefaultValue("hot");
@@ -108,8 +109,8 @@ public partial class TaskDbContext : DbContext
             entity.Property(e => e.Area).HasColumnName("area");
             entity.Property(e => e.AskingPrice).HasColumnName("askingPrice");
             entity.Property(e => e.Date)
-                 .HasMaxLength(50)
-                 .HasColumnName("date");
+                .HasMaxLength(50)
+                .HasColumnName("date");
             entity.Property(e => e.Email)
                 .HasMaxLength(255)
                 .HasColumnName("email");

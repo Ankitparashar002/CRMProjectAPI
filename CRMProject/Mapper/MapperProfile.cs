@@ -15,6 +15,8 @@ public class MapperProfile : Profile
         CreateMap<Lead, LeadDto>().ReverseMap();
         CreateMap<MyProfile, MyProfileDto>().ReverseMap();
         CreateMap<MyProfile,UrlDto>().ReverseMap();
+        CreateMap<Customer,RefrenceCustomerDto>().ReverseMap();
+        CreateMap<Customer,RefrenceCustomerDto>().ReverseMap();
     }
 
 }
